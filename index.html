@@ -212,7 +212,8 @@ a:hover{color:var(--accent-deep)}
   display:grid;grid-template-columns:100px 1fr;gap:32px;
   padding:40px 0 40px 24px;
   border-bottom:1px solid var(--line);
-  cursor:pointer;transition:all .35s;position:relative
+  cursor:pointer;transition:all .35s;position:relative;
+  color:inherit;text-decoration:none
 }
 .post-item:first-child{padding-top:0}
 .post-item::before{
@@ -257,8 +258,11 @@ a:hover{color:var(--accent-deep)}
   line-height:1.7;display:-webkit-box;
   -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
 }
+.post-meta-row{
+  display:flex;align-items:center;justify-content:space-between;margin-top:12px
+}
 .read-indicator{
-  margin-top:12px;font-size:12px;font-weight:600;
+  font-size:12px;font-weight:600;
   color:var(--accent);letter-spacing:.1em;
   text-transform:uppercase;
   opacity:0;
@@ -266,6 +270,10 @@ a:hover{color:var(--accent-deep)}
   transition:all .35s cubic-bezier(.22,1,.36,1)
 }
 .post-item:hover .read-indicator{opacity:1;transform:translateX(0)}
+.reading-time{
+  font-size:12px;color:var(--ink-faint);
+  font-family:var(--font-display);letter-spacing:.04em
+}
 
 /* ===== 空状态 ===== */
 .empty-state{
@@ -692,7 +700,40 @@ const state = {
   searchQuery: '',
   filteredPosts: [...posts],
   currentIndex: -1,
+  currentSlug: null,
 };
+
+/* ---- 路由 ---- */
+function getRoute() {
+  const hash = window.location.hash;
+  const m = hash.match(/^#\/post\/(.+)/);
+  return m ? { type: 'post', slug: m[1] } : { type: 'home' };
+}
+
+function routeTo(slug) {
+  if (slug) {
+    window.location.hash = '#/post/' + slug;
+  } else {
+    history.replaceState(null, '', window.location.pathname);
+  }
+}
+
+function handleRoute() {
+  const route = getRoute();
+  if (route.type === 'post') {
+    const post = posts.find(p => p.slug === route.slug);
+    if (post) {
+      const idx = posts.indexOf(post);
+      state.filteredPosts = [...posts];
+      state.currentTag = null;
+      state.searchQuery = '';
+      searchInput.value = '';
+      renderTags();
+      updateNavActive();
+      openPostBySlug(route.slug);
+    }
+  }
+}
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
@@ -787,8 +828,9 @@ function renderPosts() {
   }
   postList.innerHTML = list.map((post, i) => {
     const d = parseDate(post.date);
+    const rt = post.readingTime || 1;
     return `
-      <article class="post-item" data-id="${post.id}" data-index="${i}">
+      <a class="post-item" href="#/post/${post.slug}" data-slug="${post.slug}" data-index="${i}">
         <div class="post-date">
           <span class="day">${d.day}</span>
           <span class="month">${d.month}</span>
@@ -797,14 +839,20 @@ function renderPosts() {
           <div class="post-tags">${post.tags.map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
           <h2 class="post-title">${post.title}</h2>
           <p class="post-excerpt">${post.excerpt}</p>
-          <div class="read-indicator">阅读 &rarr;</div>
+          <div class="post-meta-row">
+            <span class="read-indicator">阅读 &rarr;</span>
+            <span class="reading-time">${rt} 分钟</span>
+          </div>
         </div>
-      </article>`;
+      </a>`;
   }).join('');
+  // 点击拦截：用 hash 路由，不刷新页面。中键/右键新标签页原生支持。
   postList.querySelectorAll('.post-item').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
       state.currentIndex = parseInt(el.dataset.index);
-      openPost(parseInt(el.dataset.id));
+      const post = posts.find(p => p.slug === el.dataset.slug);
+      if (post) openPostBySlug(post.slug);
     });
   });
   observePosts();
@@ -842,21 +890,32 @@ function buildTOC(container) {
 }
 
 /* ---- 打开文章 ---- */
-function openPost(id) {
-  const post = posts.find(p => p.id === id);
+function openPostBySlug(slug) {
+  const post = posts.find(p => p.slug === slug);
   if (!post) return;
+
+  // 更新 hash 路由和页面标题
+  if (state.currentSlug !== slug) {
+    state.currentSlug = slug;
+    routeTo(slug);
+  }
+  document.title = post.title + ' — 雨落';
+
   const d = parseDate(post.date);
-  const idx = state.currentIndex;
-  const list = state.filteredPosts;
-  const prev = idx > 0 ? list[idx - 1] : null;
-  const next = idx < list.length - 1 ? list[idx + 1] : null;
+  const idx = posts.indexOf(post);
+  state.currentIndex = idx;
+  const list = state.filteredPosts.length > 0 ? state.filteredPosts : posts;
+  const fidx = list.findIndex(p => p.slug === slug);
+  const prev = fidx > 0 ? list[fidx - 1] : null;
+  const next = fidx < list.length - 1 ? list[fidx + 1] : null;
+  const rt = post.readingTime || 1;
 
   let navHtml = '';
   if (prev || next) {
     navHtml = '<div class="detail-nav">';
-    if (prev) navHtml += `<a href="javascript:;" class="nav-prev" data-nav-id="${prev.id}">&larr; ${prev.title}</a>`;
+    if (prev) navHtml += `<a href="#/post/${prev.slug}" class="nav-prev" data-nav-slug="${prev.slug}">&larr; ${prev.title}</a>`;
     else navHtml += '<span></span>';
-    if (next) navHtml += `<a href="javascript:;" class="nav-next" data-nav-id="${next.id}">${next.title} &rarr;</a>`;
+    if (next) navHtml += `<a href="#/post/${next.slug}" class="nav-next" data-nav-slug="${next.slug}">${next.title} &rarr;</a>`;
     navHtml += '</div>';
   }
 
@@ -866,13 +925,25 @@ function openPost(id) {
       <span class="seal-text">ESSAY / ${d.month.toUpperCase()}</span>
     </div>
     <h1 class="detail-title">${post.title}</h1>
-    <div class="detail-meta">${d.full}</div>
+    <div class="detail-meta">${d.full} &middot; 阅读约 ${rt} 分钟</div>
     <div class="detail-body" id="detailBody">${post.content}</div>
     ${navHtml}
   `;
 
+  openPostDOM();
+}
+
+/* ---- 旧版兼容 —— openPost(id) 转为 slug 查找 ---- */
+function openPost(id) {
+  const post = posts.find(p => p.id === id);
+  if (post) openPostBySlug(post.slug);
+}
+
+function openPostDOM() {
+  const bodyEl = document.getElementById('detailBody');
+  if (!bodyEl) return;
+
   // 为代码块添加语言类（Prism 需要）
-  const bodyEl = $('#detailBody');
   bodyEl.querySelectorAll('pre code:not([class*="language-"])').forEach(el => {
     const txt = el.textContent;
     let lang = 'javascript';
@@ -890,7 +961,8 @@ function openPost(id) {
   if (tocHtml) {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = tocHtml;
-    modalBody.querySelector('.detail-meta').after(wrapper);
+    const metaEl = modalBody.querySelector('.detail-meta');
+    if (metaEl) metaEl.after(wrapper);
 
     const tocBtn = wrapper.querySelector('#tocToggle');
     const tocPanel = wrapper.querySelector('#tocPanel');
@@ -919,11 +991,10 @@ function openPost(id) {
   progressBar.style.width = '0';
 
   requestAnimationFrame(() => {
-    modalBody.querySelectorAll('[data-nav-id]').forEach(a => {
-      a.addEventListener('click', () => {
-        const nid = parseInt(a.dataset.navId);
-        const nidx = list.findIndex(p => p.id === nid);
-        if (nidx >= 0) { state.currentIndex = nidx; openPost(nid); }
+    modalBody.querySelectorAll('[data-nav-slug]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        openPostBySlug(a.dataset.navSlug);
       });
     });
   });
@@ -931,6 +1002,9 @@ function openPost(id) {
 
 /* ---- 关闭模态框 ---- */
 function closeModal() {
+  state.currentSlug = null;
+  routeTo(null);
+  document.title = '雨落 · 代码与笔墨';
   modalContent.classList.add('modal-out');
   setTimeout(() => {
     modalOverlay.classList.remove('open');
@@ -1045,6 +1119,14 @@ function init() {
   modalClose.addEventListener('click', closeModal);
   modalScrim.addEventListener('click', closeModal);
   themeBtn.addEventListener('click', toggleTheme);
+
+  // 路由：监听浏览器前进/后退
+  window.addEventListener('hashchange', handleRoute);
+
+  // 启动时检查深层链接（新标签页打开时自动展开文章）
+  if (window.location.hash) {
+    handleRoute();
+  }
 }
 
 if (document.readyState === 'loading') {

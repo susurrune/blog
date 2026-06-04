@@ -1,7 +1,7 @@
 /**
  * 博客文章数据 — 由 build.js 自动生成
  * 请勿手动编辑此文件
- * 生成时间: 2026-06-04T15:24:06.048Z
+ * 生成时间: 2026-06-04T15:37:09.979Z
  * 文章数量: 3
  */
 const BLOG_META = {
@@ -10,7 +10,7 @@ const BLOG_META = {
   url: 'https://susurrune.github.io/blog',
   author: '雨落',
   postCount: 3,
-  builtAt: '2026-06-04T15:24:06.049Z',
+  builtAt: '2026-06-04T15:37:09.980Z',
 };
 
 const posts = [
