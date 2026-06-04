@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#C96F46">
+<meta name="description" content="雨落（Rain Drop）— 关于编程、架构与思考的笔记。写代码，写世界。">
+<meta name="author" content="雨落">
+<meta property="og:title" content="雨落 · 代码与笔墨">
+<meta property="og:description" content="关于编程、架构与思考的笔记">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://susurrune.github.io/blog/">
+<meta property="og:site_name" content="雨落 · 代码与笔墨">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="雨落 · 代码与笔墨">
+<meta name="twitter:description" content="关于编程、架构与思考的笔记">
+<link rel="canonical" href="https://susurrune.github.io/blog/">
+<link rel="alternate" type="application/atom+xml" title="雨落 · RSS 订阅" href="feed.xml">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="favicon.svg">
 <title>雨落 · 代码与笔墨</title>
@@ -547,6 +560,27 @@ a:hover{color:var(--accent-deep)}
 .detail-nav .nav-next{text-align:right;margin-left:auto}
 .detail-nav .nav-prev{text-align:left}
 
+/* ===== 分享按钮 ===== */
+.share-bar{
+  display:flex;align-items:center;gap:8px;
+  margin-top:32px;padding-top:20px;border-top:1px solid var(--line)
+}
+.share-bar .share-label{
+  font-size:11px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--ink-faint);font-family:var(--font-display);margin-right:4px
+}
+.share-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;padding:6px 14px;border:1px solid var(--line);
+  color:var(--ink-soft);background:var(--surface);
+  cursor:pointer;border-radius:var(--radius-sm);
+  transition:all .2s;font-family:var(--font-body)
+}
+.share-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ===== Giscus 评论区 ===== */
+.comments-section{margin-top:36px;padding-top:24px;border-top:1px solid var(--line)}
+
 /* ===== 页脚 ===== */
 .site-footer{
   display:flex;justify-content:space-between;align-items:center;
@@ -673,7 +707,10 @@ a:hover{color:var(--accent-deep)}
 
 <footer class="site-footer container">
   <span>&copy; 2026 雨落</span>
-  <span>文章总数 <strong id="postCount">0</strong></span>
+  <span>
+    <a href="feed.xml" target="_blank" title="RSS 订阅" style="margin-right:16px">📡 RSS</a>
+    文章总数 <strong id="postCount">0</strong>
+  </span>
 </footer>
 
 <!-- ===== 模态框 ===== -->
@@ -737,6 +774,17 @@ function handleRoute() {
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
+
+/* ---- SEO meta 更新 ---- */
+function updateMeta(prop, val) {
+  let el = document.querySelector(`meta[property="${prop}"], meta[name="${prop}"]`);
+  if (el) { el.content = val; return; }
+  el = document.createElement('meta');
+  if (prop.startsWith('og:')) el.setAttribute('property', prop);
+  else el.setAttribute('name', prop);
+  el.content = val;
+  document.head.appendChild(el);
+}
 
 const postList = $('#postList');
 const filterGroup = $('#filterGroup');
@@ -901,6 +949,18 @@ function openPostBySlug(slug) {
   }
   document.title = post.title + ' — 雨落';
 
+  // 动态更新 SEO meta 标签（社交分享用）
+  const postUrl = 'https://susurrune.github.io/blog/#/post/' + slug;
+  updateMeta('og:title', post.title);
+  updateMeta('og:description', post.excerpt);
+  updateMeta('og:url', postUrl);
+  updateMeta('og:type', 'article');
+  updateMeta('twitter:title', post.title);
+  updateMeta('twitter:description', post.excerpt);
+  updateMeta('description', post.excerpt);
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.href = postUrl;
+
   const d = parseDate(post.date);
   const idx = posts.indexOf(post);
   state.currentIndex = idx;
@@ -985,6 +1045,51 @@ function openPostDOM() {
     Prism.highlightAllUnder(modalBody);
   }
 
+  // 社交分享按钮
+  const shareSlug = state.currentSlug;
+  const shareTitle = encodeURIComponent(document.title);
+  const shareUrl = encodeURIComponent('https://susurrune.github.io/blog/#/post/' + shareSlug);
+  const shareBar = document.createElement('div');
+  shareBar.className = 'share-bar';
+  shareBar.innerHTML = `
+    <span class="share-label">分享</span>
+    <button class="share-btn copy-link" title="复制链接">🔗 复制链接</button>
+    <button class="share-btn share-twitter" title="分享到 Twitter/X">𝕏 Tweet</button>
+    <button class="share-btn share-native" title="原生分享">📤 分享</button>
+  `;
+  // 插入到正文之后、导航之前
+  const detailBody = modalBody.querySelector('#detailBody');
+  if (detailBody) detailBody.after(shareBar);
+
+  shareBar.querySelector('.copy-link').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText('https://susurrune.github.io/blog/#/post/' + shareSlug);
+      const btn = shareBar.querySelector('.copy-link');
+      btn.textContent = '✅ 已复制';
+      setTimeout(() => { btn.textContent = '🔗 复制链接'; }, 2000);
+    } catch {
+      prompt('复制以下链接：', 'https://susurrune.github.io/blog/#/post/' + shareSlug);
+    }
+  });
+  shareBar.querySelector('.share-twitter').addEventListener('click', () => {
+    window.open('https://twitter.com/intent/tweet?text=' + shareTitle + '&url=' + shareUrl, '_blank', 'width=600,height=400');
+  });
+  shareBar.querySelector('.share-native').addEventListener('click', () => {
+    if (navigator.share) {
+      navigator.share({ title: document.title, url: 'https://susurrune.github.io/blog/#/post/' + shareSlug });
+    } else {
+      prompt('复制以下链接分享：', 'https://susurrune.github.io/blog/#/post/' + shareSlug);
+    }
+  });
+
+  // Giscus 评论区
+  const commentsWrap = document.createElement('div');
+  commentsWrap.className = 'comments-section';
+  commentsWrap.id = 'giscusContainer';
+  commentsWrap.innerHTML = '<div id="giscus"></div>';
+  shareBar.after(commentsWrap);
+  loadComments(shareSlug);
+
   modalOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
   modalContent.scrollTop = 0;
@@ -1000,11 +1105,47 @@ function openPostDOM() {
   });
 }
 
+/* ---- Giscus 评论 ---- */
+function loadComments(slug) {
+  const giscus = document.getElementById('giscus');
+  if (!giscus) return;
+  // 清空旧脚本
+  giscus.innerHTML = '';
+  const script = document.createElement('script');
+  script.src = 'https://giscus.app/client.js';
+  script.setAttribute('data-repo', 'susurrune/blog');
+  script.setAttribute('data-repo-id', 'R_kgDO_NOT_SET');     // ⚠️ 需替换为你的仓库 ID
+  script.setAttribute('data-category', 'Announcements');       // ⚠️ 需替换为你的分类
+  script.setAttribute('data-category-id', 'DIC_kwDO_NOT_SET'); // ⚠️ 需替换为你的分类 ID
+  script.setAttribute('data-mapping', 'specific');
+  script.setAttribute('data-term', slug);
+  script.setAttribute('data-reactions-enabled', '1');
+  script.setAttribute('data-emit-metadata', '0');
+  script.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+  script.setAttribute('data-lang', 'zh-CN');
+  script.setAttribute('crossorigin', 'anonymous');
+  script.async = true;
+  giscus.appendChild(script);
+}
+
 /* ---- 关闭模态框 ---- */
 function closeModal() {
   state.currentSlug = null;
   routeTo(null);
   document.title = '雨落 · 代码与笔墨';
+
+  // 重置 SEO 标签为首页默认值
+  const homeUrl = 'https://susurrune.github.io/blog/';
+  updateMeta('og:title', '雨落 · 代码与笔墨');
+  updateMeta('og:description', '关于编程、架构与思考的笔记');
+  updateMeta('og:url', homeUrl);
+  updateMeta('og:type', 'website');
+  updateMeta('twitter:title', '雨落 · 代码与笔墨');
+  updateMeta('twitter:description', '关于编程、架构与思考的笔记');
+  updateMeta('description', '雨落（Rain Drop）— 关于编程、架构与思考的笔记。写代码，写世界。');
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.href = homeUrl;
+
   modalContent.classList.add('modal-out');
   setTimeout(() => {
     modalOverlay.classList.remove('open');
