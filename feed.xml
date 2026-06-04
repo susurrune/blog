@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>雨落 · 代码与笔墨</title>
+  <subtitle>关于编程、架构与思考的笔记</subtitle>
+  <link href="https://susurrune.github.io/blog/feed.xml" rel="self"/>
+  <link href="https://susurrune.github.io/blog/"/>
+  <updated>2026-06-04T15:24:06.050Z</updated>
+  <id>https://susurrune.github.io/blog/</id>
+  <author>
+    <name>雨落</name>
+  </author>
+  <entry>
+    <title>VSCode 安装与 Claude Code 接入 DeepSeek 完整指南</title>
+    <link href="https://susurrune.github.io/blog/#/post/VSCode安装与ClaudeCode接入DeepSeek"/>
+    <id>https://susurrune.github.io/blog/#/post/VSCode安装与ClaudeCode接入DeepSeek</id>
+    <published>2026-06-04T00:00:00.000Z</published>
+    <updated>2026-06-04T00:00:00.000Z</updated>
+    <summary>从零开始安装配置 VSCode、Claude Code，并通过 CC-Switch 接入 DeepSeek 大模型，打造高效的 AI 辅助编程环境。</summary>
+    <content type="html">      &lt;h2 id=&quot;一、安装-claude-code-准备&quot;&gt;一、安装 Claude Code 准备&lt;/h2&gt;
+      &lt;h3 id=&quot;1.-环境准备（软件下载）&quot;&gt;1. 环境准备（软件下载）&lt;/h3&gt;
+      &lt;ol&gt;
+      &lt;li&gt;&lt;strong&gt;Node.js&lt;/strong&gt; 下载：&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;p&gt;https://nodejs.org/zh-cn/download&lt;/p&gt;
+      &lt;ol&gt;
+      &lt;li&gt;&lt;strong&gt;Git&lt;/strong&gt; 下载（推荐 &lt;a href=&quot;https://github.com/git-for-windows/git/releases/download/v2.54.0.windows.1/Git-2.54.0-64-bit.exe&quot;&gt;Git for Windows x64 Setup&lt;/a&gt;）：&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;p&gt;https://git-scm.com/install/windows&lt;/p&gt;
+      &lt;h3 id=&quot;2.-claude-code-安装&quot;&gt;2. Claude Code 安装&lt;/h3&gt;
+      &lt;ol&gt;
+      &lt;li&gt;按 &lt;strong&gt;Win+R&lt;/strong&gt; 输入 &lt;strong&gt;pwsh&lt;/strong&gt; 打开 PowerShell 命令行（也可以点 Win 键后直接搜索 PowerShell）。&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;p&gt;输入以下命令，解除终端脚本运行限制：&lt;/p&gt;
+      &lt;pre class=&quot;language-powershell&quot;&gt;&lt;code&gt;   Set-ExecutionPolicy RemoteSigned -Scope CurrentUser&lt;/code&gt;&lt;/pre&gt;
+      &lt;ol&gt;
+      &lt;li&gt;开始安装 Claude Code（国内网络如果 npm 官方源较慢，可临时切换镜像）：&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;p&gt;&lt;strong&gt;（1）切换官方源为国内源：&lt;/strong&gt;&lt;/p&gt;
+      &lt;pre class=&quot;language-powershell&quot;&gt;&lt;code&gt;   npm config set registry https://registry.npmmirror.com&lt;/code&gt;&lt;/pre&gt;
+      &lt;p&gt;&lt;strong&gt;（2）安装 Claude Code：&lt;/strong&gt;&lt;/p&gt;
+      &lt;pre class=&quot;language-powershell&quot;&gt;&lt;code&gt;   npm install -g @anthropic-ai/claude-code&lt;/code&gt;&lt;/pre&gt;
+      &lt;p&gt;&lt;strong&gt;（3）切换回官方源：&lt;/strong&gt;&lt;/p&gt;
+      &lt;pre class=&quot;language-powershell&quot;&gt;&lt;code&gt;   npm config set registry https://registry.npmjs.org&lt;/code&gt;&lt;/pre&gt;
+      &lt;h3 id=&quot;3.-deepseek-api-key-接入-claude-code&quot;&gt;3. DeepSeek API Key 接入 Claude Code&lt;/h3&gt;
+      &lt;ol&gt;
+      &lt;li&gt;&lt;strong&gt;DeepSeek API Key 获取&lt;/strong&gt;：&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;p&gt;https://platform.deepseek.com/api_keys&lt;/p&gt;
+      &lt;blockquote&gt;
+      &lt;p&gt;登录账号并实名认证，创建 DeepSeek 的 API Key，记得复制保存在只有自己能看的地方（比如微信&quot;文件传输助手&quot;或本地新建一个 txt 文件保存好）。&lt;/p&gt;
+      &lt;/blockquote&gt;
+      &lt;ol&gt;
+      &lt;li&gt;&lt;strong&gt;CC-Switch 下载&lt;/strong&gt;：&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;p&gt;https://github.com/farion1231/cc-switch/releases&lt;/p&gt;
+      &lt;blockquote&gt;
+      &lt;p&gt;根据自己的电脑系统下载，Windows 下载 &lt;code&gt;CC-Switch-v3.16.1-Windows.msi&lt;/code&gt;。&lt;/p&gt;
+      &lt;p&gt;下方为 Windows 直接下载链接（浏览器访问即下载，需科学上网）： https://github.com/farion1231/cc-switch/releases/download/v3.16.1/CC-Switch-v3.16.1-Windows.msi&lt;/p&gt;
+      &lt;/blockquote&gt;
+      &lt;ol&gt;
+      &lt;li&gt;使用 CC-Switch 将 Claude Code 的大模型切换为 DeepSeek：&lt;/li&gt;
+      &lt;ul&gt;
+      &lt;li&gt;安装完成后打开 CC-Switch&lt;/li&gt;
+      &lt;li&gt;选择第一项「终端版 Claude Code」&lt;/li&gt;
+      &lt;li&gt;点击右上角 &lt;strong&gt;+&lt;/strong&gt; 号，选择 &lt;strong&gt;DeepSeek&lt;/strong&gt;&lt;/li&gt;
+      &lt;li&gt;填写 DeepSeek 的 API Key 配置信息&lt;/li&gt;
+      &lt;li&gt;点击「添加」&lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;/ol&gt;
+      &lt;blockquote&gt;
+      &lt;p&gt;填写完 DeepSeek 的 API Key 之后点击「添加」，Claude Code 的 AI 大模型就换成了 DeepSeek 的 &lt;code&gt;deepseek-v4-flash&lt;/code&gt; 和 &lt;code&gt;deepseek-v4-pro&lt;/code&gt;。&lt;/p&gt;
+      &lt;/blockquote&gt;
+      &lt;ol&gt;
+      &lt;li&gt;按 &lt;strong&gt;Win+R&lt;/strong&gt; 输入 &lt;strong&gt;pwsh&lt;/strong&gt; 打开终端，输入以下指令即可使用终端版 Claude Code 全自动模式（无需多次点击 Yes）：&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;pre class=&quot;language-powershell&quot;&gt;&lt;code&gt;   claude --dangerously-skip-permissions&lt;/code&gt;&lt;/pre&gt;
+      &lt;hr&gt;
+      &lt;h2 id=&quot;二、vscode-安装与-claude-code-插件配置&quot;&gt;二、VSCode 安装与 Claude Code 插件配置&lt;/h2&gt;
+      &lt;h3 id=&quot;1.-vscode-下载&quot;&gt;1. VSCode 下载&lt;/h3&gt;
+      &lt;p&gt;https://code.visualstudio.com/Download&lt;/p&gt;
+      &lt;p&gt;下载操作系统对应版本并安装。安装后登录 GitHub（注册一个 GitHub 账号，使用谷歌邮箱或 QQ 邮箱注册均可）。&lt;/p&gt;
+      &lt;h3 id=&quot;2.-vscode-插件安装&quot;&gt;2. VSCode 插件安装&lt;/h3&gt;
+      &lt;ol&gt;
+      &lt;li&gt;&lt;strong&gt;中文插件安装&lt;/strong&gt;：点击左侧插件市场，搜索 &lt;code&gt;chinese&lt;/code&gt;，安装「中文（简体）」插件。&lt;/li&gt;
+      &lt;li&gt;&lt;strong&gt;Claude Code 插件安装&lt;/strong&gt;：搜索 &lt;code&gt;claude&lt;/code&gt;，安装 Claude Code（注意官方信息为 &lt;strong&gt;Anthropic&lt;/strong&gt;，不要装错）。&lt;/li&gt;
+      &lt;li&gt;安装完成后，点击 Claude 图标即可打开对话框界面开始使用。&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;hr&gt;
+      &lt;h2 id=&quot;三、claude-code-重要-skills-安装&quot;&gt;三、Claude Code 重要 Skills 安装&lt;/h2&gt;
+      &lt;h3 id=&quot;1.-github-官方-skills-安装&quot;&gt;1. GitHub 官方 Skills 安装&lt;/h3&gt;
+      &lt;p&gt;https://github.com/anthropics/skills&lt;/p&gt;
+      &lt;p&gt;将以上链接直接发给 Claude Code，让它安装里面的技能即可。&lt;/p&gt;
+      &lt;h3 id=&quot;2.-其他技能按需选择&quot;&gt;2. 其他技能按需选择&lt;/h3&gt;
+      &lt;p&gt;需要什么技能可以直接让 Claude Code 搜索并安装。如果安装失败，告诉它你的代理端口号即可（它会使用代理进行下载安装）。&lt;/p&gt;
+      &lt;blockquote&gt;
+      &lt;p&gt;&lt;strong&gt;常用科学上网软件代理端口对照表&lt;/strong&gt;&lt;/p&gt;
+      &lt;p&gt;| 软件 | 代理协议 | 默认端口 | 说明 | |:-----|:--------:|:--------:|:-----| | &lt;strong&gt;V2RayN&lt;/strong&gt; | SOCKS5 | &lt;strong&gt;10808&lt;/strong&gt; | 本文使用的客户端，推荐与 Claude Code 配合 | | V2RayN | HTTP | &lt;strong&gt;10809&lt;/strong&gt; | 同时开启的 HTTP 代理端口 | | &lt;strong&gt;Clash Verge / FlClash&lt;/strong&gt; | HTTP / SOCKS5 | &lt;strong&gt;7890&lt;/strong&gt; | 界面清爽，功能与 V2RayN 类似 | | &lt;strong&gt;Shadowsocks&lt;/strong&gt; | SOCKS5 | &lt;strong&gt;1080&lt;/strong&gt; | 经典代理，久经考验 | | &lt;strong&gt;ShadowsocksR&lt;/strong&gt; | SOCKS5 | &lt;strong&gt;1080&lt;/strong&gt; | SSR 分支，沿用默认端口 | | &lt;strong&gt;Clash for Windows&lt;/strong&gt; | HTTP / SOCKS5 | &lt;strong&gt;7890&lt;/strong&gt; | 老牌 Clash 客户端 | | &lt;strong&gt;Surge&lt;/strong&gt; | SOCKS5 | &lt;strong&gt;6153&lt;/strong&gt; | 仅限 macOS 平台 | | &lt;strong&gt;Quantumult X&lt;/strong&gt; | SOCKS5 | &lt;strong&gt;1080&lt;/strong&gt; | 仅限 iOS 平台 | | &lt;strong&gt;Tor&lt;/strong&gt; | SOCKS5 | &lt;strong&gt;9050&lt;/strong&gt; / &lt;strong&gt;9150&lt;/strong&gt; | 匿名代理，Tor 浏览器用 9150 |&lt;/p&gt;
+      &lt;p&gt;以上为默认端口，大部分软件支持自定义。如不确定，请查看代理软件设置中的「本地监听地址」或系统代理设置。&lt;/p&gt;
+      &lt;/blockquote&gt;
+      &lt;h3 id=&quot;3.-skillhub-—-专为中国用户优化的-skills-社区&quot;&gt;3. SkillHub — 专为中国用户优化的 Skills 社区&lt;/h3&gt;
+      &lt;p&gt;可以将以下链接发给 Claude，让它下载国内版的技能：&lt;/p&gt;
+      &lt;p&gt;https://skillhub.cloud.tencent.com&lt;/p&gt;
+      </content>
+  </entry>
+  <entry>
+    <title>从零搭建前端监控系统</title>
+    <link href="https://susurrune.github.io/blog/#/post/从零搭建前端监控系统"/>
+    <id>https://susurrune.github.io/blog/#/post/从零搭建前端监控系统</id>
+    <published>2026-05-22T00:00:00.000Z</published>
+    <updated>2026-05-22T00:00:00.000Z</updated>
+    <summary>前端监控是线上应用的&quot;眼睛&quot;。从错误采集到性能分析，一步步搭建一个轻量级的前端监控系统。</summary>
+    <content type="html">      &lt;h2 id=&quot;为什么需要前端监控？&quot;&gt;为什么需要前端监控？&lt;/h2&gt;
+      &lt;p&gt;没有监控的前端应用就像蒙眼开车——你不知道用户遇到了什么错误，页面加载有多慢，API 接口是否稳定。&lt;/p&gt;
+      &lt;p&gt;一个完整的前端监控系统需要覆盖三个维度：&lt;/p&gt;
+      &lt;ul&gt;
+      &lt;li&gt;&lt;strong&gt;错误监控&lt;/strong&gt; — JavaScript 运行时错误、资源加载失败、未捕获的 Promise 异常&lt;/li&gt;
+      &lt;li&gt;&lt;strong&gt;性能监控&lt;/strong&gt; — 页面加载时间、首屏渲染时间、API 响应时间&lt;/li&gt;
+      &lt;li&gt;&lt;strong&gt;用户行为&lt;/strong&gt; — PV/UV、页面停留时长、点击热力图&lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;h2 id=&quot;错误采集&quot;&gt;错误采集&lt;/h2&gt;
+      &lt;h3 id=&quot;全局错误捕获&quot;&gt;全局错误捕获&lt;/h3&gt;
+      &lt;pre class=&quot;language-javascript&quot;&gt;&lt;code&gt;// 捕获运行时错误
+      window.onerror = function(message, source, lineno, colno, error) {
+        report({
+          type: &apos;runtime_error&apos;,
+          message: message,
+          source: source,
+          line: lineno,
+          column: colno,
+          stack: error?.stack
+        });
+        return true;
+      };
+      
+      // 捕获未处理的 Promise 异常
+      window.addEventListener(&apos;unhandledrejection&apos;, function(event) {
+        report({
+          type: &apos;promise_error&apos;,
+          message: event.reason?.message || String(event.reason),
+          stack: event.reason?.stack
+        });
+      });&lt;/code&gt;&lt;/pre&gt;
+      &lt;h3 id=&quot;资源加载失败&quot;&gt;资源加载失败&lt;/h3&gt;
+      &lt;pre class=&quot;language-javascript&quot;&gt;&lt;code&gt;// 资源加载错误（图片、脚本、样式表）
+      window.addEventListener(&apos;error&apos;, function(event) {
+        const target = event.target;
+        if (target &amp;amp;&amp;amp; (target.tagName === &apos;IMG&apos; || target.tagName === &apos;SCRIPT&apos; || target.tagName === &apos;LINK&apos;)) {
+          report({
+            type: &apos;resource_error&apos;,
+            tag: target.tagName,
+            src: target.src || target.href
+          });
+        }
+      }, true); // 捕获阶段监听&lt;/code&gt;&lt;/pre&gt;
+      &lt;h2 id=&quot;性能监控&quot;&gt;性能监控&lt;/h2&gt;
+      &lt;p&gt;使用 Performance API 采集关键性能指标：&lt;/p&gt;
+      &lt;pre class=&quot;language-javascript&quot;&gt;&lt;code&gt;function collectPerformanceMetrics() {
+        const timing = performance.timing;
+        const nav = performance.navigation;
+      
+        const metrics = {
+          // DNS 解析耗时
+          dns: timing.domainLookupEnd - timing.domainLookupStart,
+          // TCP 连接耗时
+          tcp: timing.connectEnd - timing.connectStart,
+          // TTFB（首字节时间）
+          ttfb: timing.responseStart - timing.requestStart,
+          // DOM 解析耗时
+          domParse: timing.domInteractive - timing.domLoading,
+          // DOMContentLoaded 时间
+          dcl: timing.domContentLoadedEventEnd - timing.navigationStart,
+          // 页面完全加载时间
+          load: timing.loadEventEnd - timing.navigationStart,
+        };
+      
+        // LCP（最大内容绘制）
+        if (performance.getEntriesByType) {
+          const paintEntries = performance.getEntriesByType(&apos;paint&apos;);
+          paintEntries.forEach(entry =&amp;gt; {
+            if (entry.name === &apos;first-contentful-paint&apos;) {
+              metrics.fcp = entry.startTime;
+            }
+          });
+        }
+      
+        return metrics;
+      }&lt;/code&gt;&lt;/pre&gt;
+      &lt;h2 id=&quot;上报策略&quot;&gt;上报策略&lt;/h2&gt;
+      &lt;p&gt;批量上报 + 压缩，减少对业务的影响：&lt;/p&gt;
+      &lt;pre class=&quot;language-javascript&quot;&gt;&lt;code&gt;class Reporter {
+        constructor(config) {
+          this.buffer = [];
+          this.maxSize = config.batchSize || 10;
+          this.interval = config.flushInterval || 5000;
+          this.endpoint = config.endpoint;
+          this._startTimer();
+        }
+      
+        report(data) {
+          data.timestamp = Date.now();
+          data.url = window.location.href;
+          data.userId = getUserToken();
+          this.buffer.push(data);
+      
+          if (this.buffer.length &amp;gt;= this.maxSize) {
+            this.flush();
+          }
+        }
+      
+        flush() {
+          if (this.buffer.length === 0) return;
+      
+          const payload = this.buffer.slice();
+          this.buffer = [];
+      
+          // 使用 sendBeacon，页面卸载时也能可靠上报
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon(this.endpoint, JSON.stringify(payload));
+          } else {
+            new Image().src = \`\${this.endpoint}?data=\${encodeURIComponent(JSON.stringify(payload))}\`;
+          }
+        }
+      
+        _startTimer() {
+          setInterval(() =&amp;gt; this.flush(), this.interval);
+          // 页面关闭前强制上报
+          window.addEventListener(&apos;beforeunload&apos;, () =&amp;gt; this.flush());
+        }
+      }&lt;/code&gt;&lt;/pre&gt;
+      &lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
+      &lt;p&gt;前端监控系统的核心思路其实很简单：&lt;strong&gt;采集 → 聚合 → 上报 → 展示&lt;/strong&gt;。关键在于采集要全、上报要轻、聚合要准。&lt;/p&gt;
+      &lt;blockquote&gt;
+      &lt;p&gt;监控不是为了监控而监控，而是为了更快地发现问题、定位问题、解决问题。一个好的监控系统，应该是&quot;用了感觉不到存在，出了问题才知道它多重要&quot;的基建工程。&lt;/p&gt;
+      &lt;/blockquote&gt;
+      </content>
+  </entry>
+  <entry>
+    <title>发布指南 — 如何写一篇博客</title>
+    <link href="https://susurrune.github.io/blog/#/post/00-格式示例"/>
+    <id>https://susurrune.github.io/blog/#/post/00-格式示例</id>
+    <published>2026-05-20T00:00:00.000Z</published>
+    <updated>2026-05-20T00:00:00.000Z</updated>
+    <summary>在 posts/md/ 中放一个 .md 文件，运行 node build.js，文章自动发布。本文展示了所有支持的 Markdown 语法。</summary>
+    <content type="html">      &lt;h2 id=&quot;快速开始&quot;&gt;快速开始&lt;/h2&gt;
+      &lt;ol&gt;
+      &lt;li&gt;在 &lt;code&gt;posts/md/&lt;/code&gt; 目录下创建一个 &lt;code&gt;.md&lt;/code&gt; 文件&lt;/li&gt;
+      &lt;li&gt;文件头部用 &lt;code&gt;---&lt;/code&gt; 包裹 YAML 格式的元数据&lt;/li&gt;
+      &lt;li&gt;正文使用 Markdown 编写&lt;/li&gt;
+      &lt;li&gt;运行 &lt;code&gt;node build.js&lt;/code&gt;，自动生成 &lt;code&gt;posts/data.js&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;刷新浏览器即可看到新文章&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;h2 id=&quot;标题层级&quot;&gt;标题层级&lt;/h2&gt;
+      &lt;h3 id=&quot;三级标题&quot;&gt;三级标题&lt;/h3&gt;
+      &lt;h4 id=&quot;四级标题&quot;&gt;四级标题&lt;/h4&gt;
+      &lt;h5 id=&quot;五级标题&quot;&gt;五级标题&lt;/h5&gt;
+      &lt;h6 id=&quot;六级标题&quot;&gt;六级标题&lt;/h6&gt;
+      &lt;h2 id=&quot;文本样式&quot;&gt;文本样式&lt;/h2&gt;
+      &lt;p&gt;普通文本，&lt;strong&gt;粗体文字&lt;/strong&gt;，&lt;em&gt;斜体文字&lt;/em&gt;，&lt;strong&gt;&lt;em&gt;粗斜体&lt;/em&gt;&lt;/strong&gt;，&lt;del&gt;删除线&lt;/del&gt;，&lt;code&gt;行内代码&lt;/code&gt;。&lt;/p&gt;
+      &lt;h2 id=&quot;代码块&quot;&gt;代码块&lt;/h2&gt;
+      &lt;pre class=&quot;language-javascript&quot;&gt;&lt;code&gt;function greet(name) {
+        return \`Hello, \${name}!\`;
+      }
+      console.log(greet(&apos;World&apos;));&lt;/code&gt;&lt;/pre&gt;
+      &lt;pre class=&quot;language-python&quot;&gt;&lt;code&gt;def fib(n):
+          a, b = 0, 1
+          for _ in range(n):
+              a, b = b, a + b
+          return a&lt;/code&gt;&lt;/pre&gt;
+      &lt;p&gt;无语言标识的纯文本块：&lt;/p&gt;
+      &lt;pre&gt;&lt;code&gt;This is a plain text block.
+      It has no syntax highlighting.&lt;/code&gt;&lt;/pre&gt;
+      &lt;h2 id=&quot;列表&quot;&gt;列表&lt;/h2&gt;
+      &lt;p&gt;无序列表：&lt;/p&gt;
+      &lt;ul&gt;
+      &lt;li&gt;响应式设计&lt;/li&gt;
+      &lt;li&gt;性能优化&lt;/li&gt;
+      &lt;li&gt;可访问性&lt;/li&gt;
+      &lt;ul&gt;
+      &lt;li&gt;ARIA 标签&lt;/li&gt;
+      &lt;li&gt;键盘导航&lt;/li&gt;
+      &lt;li&gt;屏幕阅读器支持&lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;/ul&gt;
+      &lt;p&gt;有序列表：&lt;/p&gt;
+      &lt;ol&gt;
+      &lt;li&gt;需求分析&lt;/li&gt;
+      &lt;li&gt;技术选型&lt;/li&gt;
+      &lt;li&gt;原型开发&lt;/li&gt;
+      &lt;li&gt;测试迭代&lt;/li&gt;
+      &lt;/ol&gt;
+      &lt;h2 id=&quot;引用&quot;&gt;引用&lt;/h2&gt;
+      &lt;blockquote&gt;
+      &lt;p&gt;测量出来的东西，才能被改进。 — Peter Drucker&lt;/p&gt;
+      &lt;p&gt;技术选型的核心不是找&quot;最好的&quot;技术，而是找最适合当前团队和当前业务的技术。&lt;/p&gt;
+      &lt;/blockquote&gt;
+      &lt;h2 id=&quot;链接与图片&quot;&gt;链接与图片&lt;/h2&gt;
+      &lt;p&gt;访问 &lt;a href=&quot;https://github.com&quot;&gt;GitHub&lt;/a&gt; 查看更多项目。&lt;/p&gt;
+      &lt;h2 id=&quot;表格&quot;&gt;表格&lt;/h2&gt;
+      &lt;table&gt;
+      &lt;thead&gt;
+      &lt;tr&gt;&lt;th&gt;特性&lt;/th&gt;&lt;th&gt;描述&lt;/th&gt;&lt;th&gt;优先级&lt;/th&gt;&lt;/tr&gt;
+      &lt;/thead&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;&lt;td&gt;零依赖&lt;/td&gt;&lt;td&gt;无需安装任何包&lt;/td&gt;&lt;td&gt;高&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;自动排序&lt;/td&gt;&lt;td&gt;按日期降序排列&lt;/td&gt;&lt;td&gt;高&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;增量构建&lt;/td&gt;&lt;td&gt;保留已有文章 ID&lt;/td&gt;&lt;td&gt;中&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;热更新&lt;/td&gt;&lt;td&gt;支持实时预览&lt;/td&gt;&lt;td&gt;低&lt;/td&gt;&lt;/tr&gt;
+      &lt;/tbody&gt;
+      &lt;/table&gt;
+      &lt;h2 id=&quot;分隔线&quot;&gt;分隔线&lt;/h2&gt;
+      &lt;hr&gt;
+      &lt;h2 id=&quot;注意事项&quot;&gt;注意事项&lt;/h2&gt;
+      &lt;ul&gt;
+      &lt;li&gt;日期格式必须为 &lt;code&gt;YYYY-MM-DD&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code&gt;tags&lt;/code&gt; 是数组，可以有多个标签&lt;/li&gt;
+      &lt;li&gt;&lt;code&gt;excerpt&lt;/code&gt; 会显示在文章列表的卡片上&lt;/li&gt;
+      &lt;li&gt;正文中可以直接写 HTML 标签（会被保留）&lt;/li&gt;
+      &lt;li&gt;文件按日期降序排列，最新的在最前面&lt;/li&gt;
+      &lt;/ul&gt;
+      </content>
+  </entry>
+</feed>
